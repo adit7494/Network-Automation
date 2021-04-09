@@ -1,0 +1,25 @@
+- name: "Connecting to Extreme EXOS switches"
+  hosts: switches
+  gather_facts: no
+
+  tasks:
+    # Get running configuration
+    #
+
+    - name: Get running configuration (exos)
+      exos_config:
+        backup: yes
+      register: backup_exos_location
+      when: ansible_network_os == 'exos'
+
+    - name: Create backup dir
+      file:
+        path: "/tmp/backups/{{ inventory_hostname }}"
+        state: directory
+        recurse: yes
+
+    - name: Copy backup files into /tmp/backups/ (exos)
+      copy:
+        src: "{{ backup_exos_location.backup_path }}"
+        dest: "/tmp/backups/{{ inventory_hostname }}/{{ inventory_hostname }}.bck"
+      when: ansible_network_os == 'exos'
